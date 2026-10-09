@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthPilot - AI-Powered Symptom Checker & Health Companion</title>
+  <style>
+    :root{--primary:#0EA5E9;--primary-dark:#0284C7;--success:#10B981;--warning:#F59E0B;--danger:#EF4444;--bg:#F0F9FF;--card:#FFFFFF;--text:#1E293B;--text-light:#64748B}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+    .navbar{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;padding:1rem 2rem;display:flex;align-items:center;gap:0.75rem;box-shadow:0 4px 20px rgba(14,165,233,0.3)}
+    .navbar h1{font-size:1.5rem;font-weight:700}
+    .navbar p{font-size:0.85rem;opacity:0.9}
+    .container{max-width:1100px;margin:0 auto;padding:2rem 1rem}
+    .tabs{display:flex;gap:0.5rem;margin-bottom:2rem;flex-wrap:wrap}
+    .tab-btn{padding:0.75rem 1.5rem;border:2px solid var(--primary);background:white;color:var(--primary);border-radius:12px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.3s}
+    .tab-btn.active,.tab-btn:hover{background:var(--primary);color:white;transform:translateY(-2px);box-shadow:0 4px 12px rgba(14,165,233,0.3)}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    .card{background:var(--card);border-radius:16px;padding:2rem;margin-bottom:1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.06)}
+    .card h2{font-size:1.25rem;margin-bottom:1rem}
+    textarea,input,select{width:100%;padding:0.75rem 1rem;border:2px solid #E2E8F0;border-radius:12px;font-size:1rem;transition:border-color 0.3s;font-family:inherit}
+    textarea:focus,input:focus,select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,0.15)}
+    textarea{min-height:120px;resize:vertical}
+    .form-group{margin-bottom:1rem}
+    .form-group label{display:block;font-weight:600;margin-bottom:0.4rem;color:var(--text-light);font-size:0.9rem}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;padding:0.85rem 2rem;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:all 0.3s;width:100%}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(14,165,233,0.4)}
+    .result-card{background:var(--card);border-radius:16px;padding:1.5rem;margin-bottom:1rem;border-left:5px solid var(--primary);box-shadow:0 2px 12px rgba(0,0,0,0.06);animation:slideIn 0.4s ease}
+    .result-card.severity-high{border-left-color:var(--danger)}
+    .result-card.severity-medium{border-left-color:var(--warning)}
+    .result-card.severity-low{border-left-color:var(--success)}
+    .result-card h3{font-size:1.1rem;margin-bottom:0.5rem}
+    .badge{display:inline-block;padding:0.25rem 0.75rem;border-radius:20px;font-size:0.8rem;font-weight:600;margin-bottom:0.5rem}
+    .badge.high{background:#FEE2E2;color:var(--danger)}
+    .badge.medium{background:#FEF3C7;color:#B45309}
+    .badge.low{background:#D1FAE5;color:#065F46}
+    .advice{background:#F8FAFC;border-radius:10px;padding:1rem;margin-top:0.75rem;white-space:pre-line;font-size:0.9rem}
+    .department{font-size:0.85rem;color:var(--primary);font-weight:600;margin-top:0.5rem}
+    .disclaimer{background:#FEF3C7;border:2px solid #FCD34D;border-radius:12px;padding:1rem;margin-top:1.5rem;font-size:0.9rem;color:#92400E}
+    .tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem}
+    .tip-card{background:var(--card);border-radius:12px;padding:1.25rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);transition:transform 0.3s}
+    .tip-card:hover{transform:translateY(-3px)}
+    .tip-card .icon{font-size:2rem;margin-bottom:0.5rem}
+    .tip-card .category{font-size:0.8rem;color:var(--primary);font-weight:600}
+    .tip-card .tip-text{font-size:0.9rem;margin-top:0.3rem}
+    .bmi-result{text-align:center;padding:2rem}
+    .bmi-value{font-size:3rem;font-weight:700;color:var(--primary)}
+    .bmi-category{font-size:1.2rem;font-weight:600;margin:0.5rem 0}
+    @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .hero{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;padding:2rem;border-radius:16px;margin-bottom:2rem;text-align:center}
+    .hero h2{font-size:1.75rem;margin-bottom:0.5rem}
+    .hero p{opacity:0.9}
+    @media(max-width:768px){.form-row{grid-template-columns:1fr}.hero h2{font-size:1.3rem}}
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <span style="font-size:2rem">&#x1FA7A;</span>
+    <div><h1>HealthPilot</h1><p>AI-Powered Symptom Checker &amp; Health Companion</p></div>
+  </div>
+  <div class="container">
+    <div class="hero">
+      <h2>&#x1F916; AI &#x9A71;&#x52A8;&#x7684;&#x5065;&#x5EB7;&#x7BA1;&#x7406;&#x52A9;&#x624B;</h2>
+      <p>&#x8F93;&#x5165;&#x60A8;&#x7684;&#x75C7;&#x72B6;&#xFF0C;&#x83B7;&#x53D6;&#x521D;&#x6B65;&#x5065;&#x5EB7;&#x8BC4;&#x4F30;&#x548C;&#x5EFA;&#x8BAE; | &#x8BA1;&#x7B97; BMI | &#x83B7;&#x53D6;&#x5065;&#x5EB7;&#x5C0F;&#x8D34;&#x58EB;</p>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('symptom')">&#x1F50D; &#x75C7;&#x72B6;&#x81EA;&#x67E5;</button>
+      <button class="tab-btn" onclick="switchTab('bmi')">&#x2696;&#xFE0F; BMI &#x8BA1;&#x7B97;</button>
+      <button class="tab-btn" onclick="switchTab('tips')">&#x1F4A1; &#x5065;&#x5EB7;&#x5C0F;&#x8D34;&#x58EB;</button>
+    </div>
+    <div id="symptom" class="tab-content active">
+      <div class="card">
+        <h2>&#x1F4DD; &#x63CF;&#x8FF0;&#x60A8;&#x7684;&#x75C7;&#x72B6;</h2>
+        <div class="form-group">
+          <label>&#x75C7;&#x72B6;&#x63CF;&#x8FF0;&#xFF08;&#x8BF7;&#x8BE6;&#x7EC6;&#x63CF;&#x8FF0;&#x60A8;&#x4E0D;&#x9002;&#x7684;&#x90E8;&#x4F4D;&#x3001;&#x611F;&#x89C9;&#x3001;&#x6301;&#x7EED;&#x65F6;&#x95F4;&#x7B49;&#xFF09;</label>
+          <textarea id="symptoms" placeholder="&#x4F8B;&#x5982;&#xFF1A;&#x6211;&#x6700;&#x8FD1;&#x4E09;&#x5929;&#x6301;&#x7EED;&#x53D1;&#x70E7;&#xFF0C;&#x4F53;&#x6E29;&#x5728;38&#x2103;&#x5DE6;&#x53F3;&#xFF0C;&#x4F14;&#x6709;&#x5E72;&#x54B3;&#x548C;&#x5934;&#x75BC;..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>&#x5E74;&#x9F84;</label><input type="number" id="age" placeholder="20" value="20"></div>
+          <div class="form-group"><label>&#x6027;&#x522B;</label><select id="gender"><option value="male">&#x7537;</option><option value="female">&#x5973;</option></select></div>
+        </div>
+        <button class="btn-primary" onclick="analyzeSymptoms()">&#x1F50D; &#x5206;&#x6790;&#x75C7;&#x72B6;</button>
+      </div>
+      <div id="results"></div>
+    </div>
+    <div id="bmi" class="tab-content">
+      <div class="card">
+        <h2>&#x2696;&#xFE0F; BMI &#x8EAB;&#x4F53;&#x8D28;&#x91CF;&#x6307;&#x6570;&#x8BA1;&#x7B97;</h2>
+        <div class="form-row">
+          <div class="form-group"><label>&#x4F53;&#x91CD; (kg)</label><input type="number" id="weight" placeholder="65" step="0.1"></div>
+          <div class="form-group"><label>&#x8EAB;&#x9AD8; (cm)</label><input type="number" id="height" placeholder="170"></div>
+        </div>
+        <button class="btn-primary" onclick="calcBMI()">&#x1F9EE; &#x8BA1;&#x7B97; BMI</button>
+      </div>
+      <div id="bmi-result"></div>
+    </div>
+    <div id="tips" class="tab-content">
+      <div class="card">
+        <h2>&#x1F4A1; &#x6BCF;&#x65E5;&#x5065;&#x5EB7;&#x5C0F;&#x8D34;&#x58EB;</h2>
+        <div class="tips-grid" id="tips-grid"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    function switchTab(n){
+      document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.getElementById(n).classList.add('active');
+      event.target.classList.add('active');
+      if(n==='tips')loadTips();
+    }
+    async function analyzeSymptoms(){
+      const s=document.getElementById('symptoms').value.trim();
+      if(!s){alert('请输入症状描述');return;}
+      const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({symptoms:s,age:document.getElementById('age').value,gender:document.getElementById('gender').value})});
+      const d=await r.json();
+      let h='';
+      d.results.forEach(x=>{
+        h+=`<div class="result-card severity-${x.severity}"><span class="badge ${x.severity}">${x.severity==='high'?'⚠️ 高优先级':x.severity==='medium'?'🔶 中优先级':'✅ 低优先级'}</span><h3>${x.condition}</h3><div>💬 建议：</div><div class="advice">${x.advice}</div><div class="department">🏥 推荐科室：${x.department}</div></div>`;
+      });
+      h+=`<div class="disclaimer">${d.disclaimer}</div>`;
+      document.getElementById('results').innerHTML=h;
+    }
+    async function calcBMI(){
+      const w=parseFloat(document.getElementById('weight').value);
+      const h=parseFloat(document.getElementById('height').value);
+      if(!w||!h){alert('请输入体重和身高');return;}
+      const r=await fetch('/api/bmi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({weight:w,height:h})});
+      const d=await r.json();
+      document.getElementById('bmi-result').innerHTML=`<div class="card bmi-result"><div class="bmi-value">${d.bmi}</div><div class="bmi-category">${d.category}</div><p>${d.advice}</p><div style="margin-top:1rem;font-size:0.8rem;color:#94A3B8">BMI参考：偏瘦&lt;18.5 | 正常18.5-24 | 偏胖24-28 | 肥胖≥28</div></div>`;
+    }
+    async function loadTips(){
+      const r=await fetch('/api/health-tips');
+      const tips=await r.json();
+      document.getElementById('tips-grid').innerHTML=tips.map(t=>`<div class="tip-card"><div class="icon">${t.icon}</div><div class="category">${t.category}</div><div class="tip-text">${t.tip}</div></div>`).join('');
+    }
+  </script>
+</body>
+</html>
